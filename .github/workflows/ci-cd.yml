@@ -14,10 +14,13 @@ permissions:
   pages: write
   id-token: write
 
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -34,10 +37,10 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - name: Build application
-        run: npm run build
+      - name: Prepare dist folder
+        run: mkdir -p dist && cp index.html dist/index.html
 
-      - name: Upload build artifact
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist/
@@ -49,7 +52,6 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
